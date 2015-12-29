@@ -22,9 +22,9 @@
 
 (defun weather-get-query-url (location env)
   "generate url that used to fetch weather information"
-  (let ((yql_query (url-hexify-string (format "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='%s')" location)))
-        (url (format 
-              "https://query.yahooapis.com/v1/public/yql?q=%s&format=json&env=%s" yql_query env)))
+  (let* ((yql_query (url-hexify-string (format "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='%s')" location)))
+         (url (format 
+               "https://query.yahooapis.com/v1/public/yql?q=%s&format=json&env=%s" yql_query env)))
     url))
 
 (defun weather--extract-from-json-object (json-object extract-place-list)
@@ -61,9 +61,7 @@
   :type 'sexp
   :group 'weather)
 
-  (defvar weather-mode-line-string nil
-    "String to display in the mode line.")
-  (put 'weather-mode-line-string 'risky-local-variable t)
+(put 'weather-mode-line 'risky-local-variable t)
 
 ;;; Glboal Minor-mode
 
@@ -74,16 +72,13 @@ With a prefix argument ARG, enable weather mode if ARG is
 positive, and disable it otherwise.  If called from Lisp, enable
 the mode if ARG is omitted or nil."
   :global t :group 'weather
-  (setq weather-mode-line-string "")
   (unless global-mode-string
     (setq global-mode-string '("")))
   (if (not weather-mode)
       (setq global-mode-string
-            (delq 'weather-mode-line-string global-mode-string))
-    (add-to-list 'global-mode-string 'weather-mode-line-string t)
-    (weather-update-info)
-    (setq weather-mode-line-string
-          weather-mode-line)))
+            (delq 'weather-mode-line global-mode-string))
+    (add-to-list 'global-mode-string 'weather-mode-line t)
+    (weather-update-info)))
 
 (provide 'weather)
 ;;; weather.el ends here
