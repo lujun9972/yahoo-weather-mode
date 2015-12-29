@@ -90,7 +90,7 @@
 
 (defcustom weather-mode-line
   '(:eval
-    (concat " " weather-info))
+    (format "[%s]" weather-info))
   "Mode line lighter for weather-mode."
   :type 'sexp
   :group 'weather)
