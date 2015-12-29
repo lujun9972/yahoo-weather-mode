@@ -45,14 +45,16 @@
     (let* ((json-object (json-read-from-string content))
            (temperature (weather--extract-from-json-object json-object '(query results channel item condition temp)))
            (text (weather--extract-from-json-object json-object '(query results channel item condition text))))
-      (setq weather-info (format "%s %sF" text temperature))
-      (run-at-time weather-update-interval nil #'weather-update-info))))
+      (setq weather-info (format "%s %sF" text temperature)))))
 
 (defun weather-update-info ()
   "update weather information"
   (interactive)
   (let ((url (weather-get-query-url weather-location weather-env)))
     (url-retrieve url 'weather-update-info-cb nil t)))
+
+
+;;; Glboal Minor-mode
 
 (defcustom weather-mode-line
   '(:eval
@@ -62,8 +64,8 @@
   :group 'weather)
 
 (put 'weather-mode-line 'risky-local-variable t)
-
-;;; Glboal Minor-mode
+
+(defvar weather-update-info-timer nil)
 
 ;;;###autoload
 (define-minor-mode weather-mode
@@ -74,9 +76,12 @@ the mode if ARG is omitted or nil."
   :global t :group 'weather
   (unless global-mode-string
     (setq global-mode-string '("")))
+  (when (timerp weather-update-info-timer)
+    (cancel-timer weather-update-info-timer))
   (if (not weather-mode)
       (setq global-mode-string
             (delq 'weather-mode-line global-mode-string))
+    (setq weather-update-info-timer (run-at-time nil weather-update-interval #'weather-update-info))
     (add-to-list 'global-mode-string 'weather-mode-line t)
     (weather-update-info)))
 
