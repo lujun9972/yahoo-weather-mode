@@ -42,7 +42,7 @@
   :type 'string
   :group 'weather)
 
-(defcustom weather-update-interval 60
+(defcustom weather-update-interval 3600
   "Seconds after which the weather information will be updated."
   :type 'integer
   :group 'weather)
