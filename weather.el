@@ -85,6 +85,10 @@
   (let ((url (weather-get-query-url weather-location weather-env)))
     (url-retrieve url 'weather-update-info-cb nil t)))
 
+(defun weather--f_to_c (temp)
+  ""
+  (/ (* (- temp 32.0) 5.0) 9.0))
+
 
 ;;; Glboal Minor-mode
 
