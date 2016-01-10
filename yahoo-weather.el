@@ -47,9 +47,6 @@
   :type 'integer
   :group 'yahoo-weather)
 
-(defvar yahoo-weather-info ""
-  "weather information")
-
 (defvar yahoo-weather-env (url-hexify-string "store://datatables.org/alltableswithkeys"))
 
 (defun yahoo-weather-get-query-url (location env)
@@ -77,7 +74,9 @@
     (let* ((json-object (json-read-from-string content))
            (temperature (yahoo-weather--f_to_c (string-to-number (yahoo-weather--extract-from-json-object json-object '(query results channel item condition temp)))))
            (text (yahoo-weather--extract-from-json-object json-object '(query results channel item condition text))))
-      (setq yahoo-weather-info (format "%s %.2fC" text temperature)))))
+      (setq yahoo-weather-mode-line `(:eval ,(format "%s %.2fC" text temperature)))
+      (force-mode-line-update t)
+      )))
 
 (defun yahoo-weather-update-info ()
   "update weather information"
@@ -93,8 +92,7 @@
 ;;; Glboal Minor-mode
 
 (defcustom yahoo-weather-mode-line
-  '(:eval
-    (format "[%s]" yahoo-weather-info))
+  ""
   "Mode line lighter for yahoo-weather-mode."
   :type 'sexp
   :group 'yahoo-weather)
