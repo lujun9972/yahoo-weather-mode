@@ -42,12 +42,23 @@
   :type 'string
   :group 'yahoo-weather)
 
+(defcustom yahoo-weather-format "[%(weather) %(temperature)C]"
+  "how to display the weather information.
+
+%(weather) %(temperature) %(wind-chill) %(wind-direction) %(wind-direction) %(wind-speed)
+%(atmosphere-humidity) %(atmosphere-pressure) %(atmosphere-rising) %(atmosphere-visibility)
+%(sunrise-time) %(sunset-time) will be replaced by the real value"
+  :type 'string
+  :group 'yahoo-weather)
+
 (defcustom yahoo-weather-update-interval 3600
   "Seconds after which the weather information will be updated."
   :type 'integer
   :group 'yahoo-weather)
 
 (defvar yahoo-weather-env (url-hexify-string "store://datatables.org/alltableswithkeys"))
+
+(defvar yahoo-weather-info)
 
 (defun yahoo-weather-get-query-url (location env)
   "generate url that used to fetch weather information"
@@ -65,18 +76,40 @@
         (yahoo-weather--extract-from-json-object json-object extract-place-list)
       json-object)))
 
+(defun yahoo-weather-info-format (json-object format-string)
+    (let ((temperature (yahoo-weather--f_to_c (string-to-number (yahoo-weather--extract-from-json-object json-object '(query results channel item condition temp)))))
+          (text (yahoo-weather--extract-from-json-object json-object '(query results channel item condition text)))
+          (wind-chill (yahoo-weather--extract-from-json-object json-object '(query results channel wind chill)))
+          (wind-direction (yahoo-weather--extract-from-json-object json-object '(query results channel wind direction)))
+          (wind-speed (yahoo-weather--extract-from-json-object json-object '(query results channel wind speed)))
+          (atmosphere-humidity (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere humidity)))
+          (atmosphere-pressure (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere pressure)))
+          (atmosphere-rising (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere rising)))
+          (atmosphere-visibility (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere visibility)))
+          (sunrise-time (yahoo-weather--extract-from-json-object json-object '(query results channel astronomy sunrise)))
+          (sunset-time (yahoo-weather--extract-from-json-object json-object '(query results channel astronomy sunset)))
+          )
+      (setq format-string (replace-regexp-in-string "%(weather)" text format-string t))
+      (setq format-string (replace-regexp-in-string "%(temperature)" (format "%.2f" temperature) format-string t))
+      (setq format-string (replace-regexp-in-string "%(wind-chill)" wind-chill format-string t))
+      (setq format-string (replace-regexp-in-string "%(wind-direction)" wind-direction format-string t))
+      (setq format-string (replace-regexp-in-string "%(wind-speed)" wind-speed format-string t))
+      (setq format-string (replace-regexp-in-string "%(atmosphere-humidity)" atmosphere-humidity format-string t))
+      (setq format-string (replace-regexp-in-string "%(atmosphere-pressure)" atmosphere-pressure format-string t))
+      (setq format-string (replace-regexp-in-string "%(atmosphere-rising)" atmosphere-rising format-string t))
+      (setq format-string (replace-regexp-in-string "%(atmosphere-visibility)" atmosphere-visibility format-string t))
+      (setq format-string (replace-regexp-in-string "%(sunrise-time)" sunrise-time format-string t))
+      (setq format-string (replace-regexp-in-string "%(sunset-time)" sunset-time format-string t))
+      format-string))
+
 (defun yahoo-weather-update-info-cb (status &rest cbargs)
   (let (content)
     (goto-char (point-min))
     (when (search-forward-regexp "^$" nil t)
       (setq content (buffer-substring-no-properties (+ (point) 1) (point-max))))
     (kill-buffer)
-    (let* ((json-object (json-read-from-string content))
-           (temperature (yahoo-weather--f_to_c (string-to-number (yahoo-weather--extract-from-json-object json-object '(query results channel item condition temp)))))
-           (text (yahoo-weather--extract-from-json-object json-object '(query results channel item condition text))))
-      (setq yahoo-weather-mode-line `(:eval ,(format "%s %.2fC" text temperature)))
-      (force-mode-line-update t)
-      )))
+    (force-mode-line-update t)
+    (setq yahoo-weather-info (json-read-from-string content))))
 
 (defun yahoo-weather-update-info ()
   "update weather information"
@@ -92,7 +125,7 @@
 ;;; Glboal Minor-mode
 
 (defcustom yahoo-weather-mode-line
-  ""
+  '(:eval (yahoo-weather-info-format yahoo-weather-info yahoo-weather-format))
   "Mode line lighter for yahoo-weather-mode."
   :type 'sexp
   :group 'yahoo-weather)
