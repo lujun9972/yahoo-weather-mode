@@ -1,6 +1,6 @@
 ;;; yahoo-weather.el --- Displays weather information in mode-line  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2015 DarkSun <lujun9972@gmail.com>.
 
 ;; Author: DarkSun <lujun9972@gmail.com>
 ;; URL: https://github.com/lujun9972/yahoo-weather-mode
