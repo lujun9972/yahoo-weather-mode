@@ -4,6 +4,7 @@
 
 ;; Author: DarkSun <lujun9972@gmail.com>
 ;; URL: https://github.com/lujun9972/yahoo-weather-mode
+;; Package-Version: 20160426.529
 ;; Package-Requires: ((emacs "24"))
 ;; Keywords: weather, mode-line
 ;; Created: 2015-12-28
@@ -54,6 +55,16 @@
   :type 'string
   :group 'yahoo-weather)
 
+(defcustom yahoo-weather-use-F nil
+  "Set t to use Fahrenheit"
+  :type 'boolean
+  :group 'yahoo-weather)
+
+(defcustom yahoo-weather-temperture-format "%.2f"
+  "Precision to display string format.  Use '%d' for integer or '%.2f' for two decimals."
+  :type 'string
+  :group 'yahoo-weather)
+
 (defcustom yahoo-weather-update-interval 3600
   "Seconds after which the weather information will be updated."
   :type 'integer
@@ -80,20 +91,23 @@
       json-object)))
 
 (defun yahoo-weather-info-format (json-object format-string)
-    (let ((temperature (yahoo-weather--f_to_c (string-to-number (yahoo-weather--extract-from-json-object json-object '(query results channel item condition temp)))))
-          (text (yahoo-weather--extract-from-json-object json-object '(query results channel item condition text)))
-          (wind-chill (yahoo-weather--extract-from-json-object json-object '(query results channel wind chill)))
-          (wind-direction (yahoo-weather--extract-from-json-object json-object '(query results channel wind direction)))
-          (wind-speed (yahoo-weather--extract-from-json-object json-object '(query results channel wind speed)))
-          (atmosphere-humidity (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere humidity)))
-          (atmosphere-pressure (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere pressure)))
-          (atmosphere-rising (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere rising)))
-          (atmosphere-visibility (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere visibility)))
-          (sunrise-time (yahoo-weather--extract-from-json-object json-object '(query results channel astronomy sunrise)))
-          (sunset-time (yahoo-weather--extract-from-json-object json-object '(query results channel astronomy sunset)))
-          )
-      (setq format-string (replace-regexp-in-string "%(weather)" text format-string t))
-      (setq format-string (replace-regexp-in-string "%(temperature)" (format "%.2f" temperature) format-string t))
+  (let* ((temperature-F (string-to-number (yahoo-weather--extract-from-json-object json-object '(query results channel item condition temp))))
+         (temperature (yahoo-weather--f_to_c temperature-F))
+         (text (yahoo-weather--extract-from-json-object json-object '(query results channel item condition text)))
+         (wind-chill (yahoo-weather--extract-from-json-object json-object '(query results channel wind chill)))
+         (wind-direction (yahoo-weather--extract-from-json-object json-object '(query results channel wind direction)))
+         (wind-speed (yahoo-weather--extract-from-json-object json-object '(query results channel wind speed)))
+         (atmosphere-humidity (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere humidity)))
+         (atmosphere-pressure (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere pressure)))
+         (atmosphere-rising (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere rising)))
+         (atmosphere-visibility (yahoo-weather--extract-from-json-object json-object '(query results channel atmosphere visibility)))
+         (sunrise-time (yahoo-weather--extract-from-json-object json-object '(query results channel astronomy sunrise)))
+         (sunset-time (yahoo-weather--extract-from-json-object json-object '(query results channel astronomy sunset)))
+         )
+    (setq format-string (replace-regexp-in-string "%(weather)" text format-string t))
+    (if yahoo-weather-use-F
+        (setq format-string (replace-regexp-in-string "%(temperature)" (format yahoo-weather-temperture-format temperature-F) format-string t))
+      (setq format-string (replace-regexp-in-string "%(temperature)" (format yahoo-weather-temperture-format temperature) format-string t)))
       (setq format-string (replace-regexp-in-string "%(wind-chill)" wind-chill format-string t))
       (setq format-string (replace-regexp-in-string "%(wind-direction)" wind-direction format-string t))
       (setq format-string (replace-regexp-in-string "%(wind-speed)" wind-speed format-string t))
