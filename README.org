@@ -6,12 +6,13 @@
 
 * Usage
 
-customize the =yahoo-weather-location= which supports chinese characters and then 
+
+Customize the =yahoo-weather-location= which supports chinese characters and then: 
 
 ~M-x yahoo-weather-mode~
 
-default it will only display the weather and temperature.
+By default it will only display the weather and temperature.
 
-you can specify =yahoo-weather-format= to display more information
+You can specify =yahoo-weather-format= to display more information and access other settings by =M-x customize-group yahoo-weather=.
 
 [[./snapshot.jpeg]]
