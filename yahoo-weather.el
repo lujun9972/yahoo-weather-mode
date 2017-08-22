@@ -46,7 +46,7 @@
   :type 'string
   :group 'yahoo-weather)
 
-(defcustom yahoo-weather-format "[%(weather) %(temperature)C]"
+(defcustom yahoo-weather-format "[%(weather) %(temperature)℃]"
   "how to display the weather information.
 
 %(weather) %(temperature) %(wind-chill) %(wind-direction) %(wind-direction) %(wind-speed)
@@ -132,7 +132,7 @@
   "update weather information"
   (interactive)
   (let ((url (yahoo-weather-get-query-url yahoo-weather-location yahoo-weather-env)))
-    (url-retrieve url 'yahoo-weather-update-info-cb nil t)))
+    (url-retrieve url #'yahoo-weather-update-info-cb nil t)))
 
 (defun yahoo-weather--f_to_c (temp)
   "convert fahrenheit to celsius"
@@ -145,9 +145,8 @@
   '(:eval (yahoo-weather-info-format yahoo-weather-info yahoo-weather-format))
   "Mode line lighter for yahoo-weather-mode."
   :type 'sexp
+  :risky t
   :group 'yahoo-weather)
-
-(put 'yahoo-weather-mode-line 'risky-local-variable t)
 
 (defvar yahoo-weather-update-info-timer nil)
 
