@@ -145,9 +145,8 @@
   '(:eval (yahoo-weather-info-format yahoo-weather-info yahoo-weather-format))
   "Mode line lighter for yahoo-weather-mode."
   :type 'sexp
+  :risky t
   :group 'yahoo-weather)
-
-(put 'yahoo-weather-mode-line 'risky-local-variable t)
 
 (defvar yahoo-weather-update-info-timer nil)
 
