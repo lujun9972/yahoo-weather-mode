@@ -46,7 +46,7 @@
   :type 'string
   :group 'yahoo-weather)
 
-(defcustom yahoo-weather-format "[%(weather) %(temperature)C]"
+(defcustom yahoo-weather-format "[%(weather) %(temperature)℃]"
   "how to display the weather information.
 
 %(weather) %(temperature) %(wind-chill) %(wind-direction) %(wind-direction) %(wind-speed)
