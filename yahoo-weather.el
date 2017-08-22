@@ -132,7 +132,7 @@
   "update weather information"
   (interactive)
   (let ((url (yahoo-weather-get-query-url yahoo-weather-location yahoo-weather-env)))
-    (url-retrieve url 'yahoo-weather-update-info-cb nil t)))
+    (url-retrieve url #'yahoo-weather-update-info-cb nil t)))
 
 (defun yahoo-weather--f_to_c (temp)
   "convert fahrenheit to celsius"
