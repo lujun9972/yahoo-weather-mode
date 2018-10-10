@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; customize the `yahoo-weather-location' which supports chinese characters and then 
+;; customize the `yahoo-weather-location' which supports chinese characters and then
 ;;
 ;;   M-x yahoo-weather-mode
 ;;
@@ -44,6 +44,11 @@
 (defcustom yahoo-weather-location "东莞"
   "location"
   :type 'string
+  :group 'yahoo-weather)
+
+(defcustom yahoo-weather-guess-location-function nil
+  "Function to set `yahoo-weather-location'"
+  :type 'function
   :group 'yahoo-weather)
 
 (defcustom yahoo-weather-format "[%(weather) %(temperature)℃]"
@@ -77,7 +82,7 @@
 (defun yahoo-weather-get-query-url (location env)
   "generate url that used to fetch weather information"
   (let* ((yql_query (url-hexify-string (format "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='%s')" location)))
-         (url (format 
+         (url (format
                "https://query.yahooapis.com/v1/public/yql?q=%s&format=json&env=%s" yql_query env)))
     url))
 
@@ -128,9 +133,33 @@
     (force-mode-line-update t)
     (setq yahoo-weather-info (json-read-from-string content))))
 
+(defun yahoo-weather--ipinfo-parse (loc-data)
+  "convert LOC-DATA to string"
+  (concat (alist-get 'city loc-data)
+          ", "
+          (alist-get 'country loc-data)))
+
+(defun yahoo-weather-update-location-cb (status &rest _)
+  (let (content)
+    (goto-char (point-min))
+    (when (search-forward-regexp "^$" nil t)
+      (setq content (buffer-substring-no-properties (+ (point) 1) (point-max))))
+    (kill-buffer)
+    (force-mode-line-update t)
+    (setq yahoo-weather-location (yahoo-weather--ipinfo-parse (json-read-from-string content)))))
+
+(defvar yahoo-weather--ipinfo-url "https://ipinfo.io/json")
+
+(defun yahoo-weather-ipinfo ()
+  "update location information"
+  (interactive)
+  (url-retrieve yahoo-weather--ipinfo-url #'yahoo-weather-update-location-cb nil t))
+
 (defun yahoo-weather-update-info ()
   "update weather information"
   (interactive)
+  (when yahoo-weather-guess-location-function
+    (funcall yahoo-weather-guess-location-function))
   (let ((url (yahoo-weather-get-query-url yahoo-weather-location yahoo-weather-env)))
     (url-retrieve url #'yahoo-weather-update-info-cb nil t)))
 
