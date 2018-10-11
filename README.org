@@ -7,9 +7,15 @@
 * Usage
 
 
-Customize the =yahoo-weather-location= which supports chinese characters and then: 
+Customize the =yahoo-weather-location= which supports chinese characters and then:
 
 ~M-x yahoo-weather-mode~
+
+You  can set =yahoo-weather-guess-location-function= to a function that sets =yahoo-weather-location= string. For now there's only  =yahoo-weather-ipinfo=, which gets location from https://ipinfo.io/ server.
+
+#+BEGIN_SRC emacs-lisp
+  (setq yahoo-weather-guess-location-function #'yahoo-weather-ipinfo)
+#+END_SRC
 
 By default it will only display the weather and temperature.
 
